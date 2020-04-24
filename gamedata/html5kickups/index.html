@@ -78,7 +78,7 @@
           this.titleText = this.add.text(game.world.centerX, game.world.centerY - 200, "kickups", style);
           this.titleText.anchor.set(0.5);
 
-          var style = { font: "25px Roboto", fill: "blue", align: "center" };
+          var style = { font: "16px Roboto", fill: "blue", align: "center" };
           this.subText = this.add.text(game.world.centerX, game.world.centerY - 100, "keep the ball in the air for as long as you can", style);
           this.subText.anchor.set(0.5);
 
@@ -116,7 +116,7 @@
 
 		  // add background
 		  backdrop = game.add.sprite(0, 0, 'background');
-		  backdrop.width = window.innerWidth * 0.99;
+		  backdrop.width = window.innerWidth * 1.0;
 		  backdrop.height = window.innerHeight * 0.90;
 
           // add bottom grass to world
@@ -157,7 +157,7 @@
 			rotateDir = 'left';
 		  else
 			rotateDir = 'right';
-		  //this.ball.rotation = game.physics.arcade.angleToPointer(this.ball) - Math.PI;
+
 		  kickSound = game.add.audio('kick');
 		  kickSound.play();
         },
@@ -199,7 +199,7 @@
             this.scoreText.destroy();
           }
           var style = { font : "18px Roboto", fill: "blue", align: "center" };
-		  this.scoreText = this.add.text(game.world.centerX, game.world.height - 20, "Score: " + this.score + ", Highscore: " + game.highScore, style);
+		  this.scoreText = this.add.text(game.world.centerX * 0.5, game.world.height - 20, "Score: " + this.score + ", Highscore: " + game.highScore, style);
           this.scoreText.anchor.set(0.5);
         }
       };
