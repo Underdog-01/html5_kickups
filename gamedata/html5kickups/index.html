@@ -45,9 +45,9 @@
       <script type="text/javascript">
       var width = window.innerWidth;
       var height = window.innerHeight;
-	  var saveButton = "", bgSound, kickSound, cheerSound, background;
+	  var saveButton = "", bgSound, kickSound, cheerSound, background, backdrop, kickDir, rotateDir;
 	  window.saveCheer = false;
-	  var game = new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.AUTO, 'game', {
+	  var game = new Phaser.Game(width, height, Phaser.ARCADE, 'game', {
         preload: preload
       });
 
@@ -67,9 +67,6 @@
         preload : function () {
           this.load.spritesheet('button_play', 'img/button_play.png', 400, 150);
 		  game.load.audio('introsound', ['sound/intro.mp3']);
-		  game.load.audio('cheer', ['sound/cheer.mp3']);
-		  game.load.audio('kick', ['sound/quick.mp3']);		  
-		  game.load.audio('gameplaysound', ['sound/crowd.mp3']);
         },
         // Place elements in initial positions
         create : function () {
@@ -114,13 +111,16 @@
           // Enable p2 physics
           this.game.physics.startSystem(Phaser.Physics.P2JS);
 
-          this.game.physics.p2.gravity.y = 200;
-          this.game.physics.p2.restitution = 0.8;
-			background = game.add.tileSprite(0, 0, 850, 530, 'background');
-			background.tileScale.x = 1.135;
-			background.tileScale.y = 1.015;
+          this.game.physics.p2.gravity.y = 1000;
+          this.game.physics.p2.restitution = 0.6;
+
+		  // add background
+		  backdrop = game.add.sprite(0, 0, 'background');
+		  backdrop.width = window.innerWidth * 0.99;
+		  backdrop.height = window.innerHeight * 0.90;
+
           // add bottom grass to world
-          var grassHeight = Math.round(height/5);
+          var grassHeight = Math.round(height * 0.1);
           this.grass = this.add.tileSprite(game.world.centerX, height - Math.round(grassHeight/2), width, grassHeight, "grass");
           this.game.physics.p2.enable(this.grass);
           this.grass.body.static = true;
@@ -140,18 +140,24 @@
 
           // big instruction text
           var style = { font: "38px Roboto", fill: "blue", align: "center"};
-          this.instructionText = this.add.text(game.world.centerX, game.world.centerY, "keep it up!", style);
+          this.instructionText = this.add.text(game.world.centerX, game.world.centerY, "", style);
           this.instructionText.anchor.set(0.5);
         },
         kick : function () {
           this.score++;
           if (this.input.x < this.ball.x) {
             this.ball.body.velocity.x = 550;
-            this.ball.body.velocity.y = -550;
+            this.ball.body.velocity.y = -650;
           } else {
-            this.ball.body.velocity.x = -550;
-            this.ball.body.velocity.y = -550;
+            this.ball.body.velocity.x = -450;
+            this.ball.body.velocity.y = -750;
           }
+		  kickDir = game.physics.arcade.angleToPointer(this.ball);
+		  if (kickDir > -1 && kickDir < 90)
+			rotateDir = 'left';
+		  else
+			rotateDir = 'right';
+		  //this.ball.rotation = game.physics.arcade.angleToPointer(this.ball) - Math.PI;
 		  kickSound = game.add.audio('kick');
 		  kickSound.play();
         },
@@ -165,19 +171,35 @@
 			else
 				window.saveCheer = false;
             this.score = 0;
+			for (z=0;z<45;z++) {
+				if (rotateDir == 'right')
+					this.ball.angle += 0.1;
+				else
+					this.ball.angle -= 0.1;
+			}
+
 			if (game.highScore && game.highScore > 0)
 		   		scoreButton(game.highScore);
           }
         },
         update : function () {
           this.updateScore();
+		  if (this.score > 0)
+		  {
+			for (z=0;z<5;z++) {
+				if (rotateDir == 'right')
+					this.ball.angle += 1;
+				else
+					this.ball.angle -= 1;
+			}
+		  }
         },
         updateScore : function () {
           if (this.scoreText != null) {
             this.scoreText.destroy();
           }
           var style = { font : "18px Roboto", fill: "blue", align: "center" };
-          this.scoreText = this.add.text(game.world.centerX, 50, "Score: " + this.score + ", Highscore: " + game.highScore, style);
+		  this.scoreText = this.add.text(game.world.centerX, game.world.height - 20, "Score: " + this.score + ", Highscore: " + game.highScore, style);
           this.scoreText.anchor.set(0.5);
         }
       };
@@ -197,7 +219,11 @@
 
         // Start initial state - MainMenu
 		game.load.image('background','img/field.jpg');
-		game.input.touch.preventDefault = true;		
+		game.input.touch.preventDefault = true;
+		game.load.audio('cheer', ['sound/cheer.mp3']);
+		game.load.audio('kick', ['sound/quick.mp3']);
+		game.load.audio('introsound', ['sound/intro.mp3']);
+		game.load.audio('gameplaysound', ['sound/crowd.mp3']);
 		game.state.start('MainMenu');
       }
 	  function kickoffBgMusic(game, mySound, volume) {
